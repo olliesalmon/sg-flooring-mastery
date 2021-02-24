@@ -1,0 +1,153 @@
+Dto:
+	Order:
+		Fields: 	orderNo int, customerName String, state String, taxRate BigDecimal,
+					productType String, area BigDecimal, costPSF - BigDecimal, labourCostPSF BigDecimal
+					materialCost BigDecimal, labourCost BigDecimal, tax BigDecimal, total BigDecimal
+		
+		Methods:	MaterialCost = (Area * CostPerSquareFoot)
+					LaborCost = (Area * LaborCostPerSquareFoot)
+					Tax = (MaterialCost + LaborCost) * (TaxRate/100)
+					Tax rates are stored as whole numbers
+					Total = (MaterialCost + LaborCost + Tax)
+	
+	Tax:
+		Fields:		stateAbbreviation String, stateName String, taxRate, BigDecimal
+		Methods:	
+	
+	Products:
+		Fields:		productType String, costPSF BigDecimal, LaborCostPerSquareFoot BigDecimal
+		Methods:	
+
+
+Dao:
+	Order:
+        Hashmap<Order> ordersOnGivenDay
+        ArrayList<LocalDate> orderDays
+
+	    void loadOrderFile()
+	    void writeOrderFile()
+	    void loadOrderDays()
+	    void writeOrderDays()
+	    void writeBackup()
+	    Order addOrder(Order orderToAdd, LocalDate orderDate)
+	    Order getOrder(int orderNo, LocalDate orderDate)
+	    List<Order> getAllOrders(LocalDate orderDate)
+	    Order removeOrder(int orderNo, LocalDate orderDate)
+					
+	Tax:
+	    HashMap<Tax> taxes
+
+	    void loadTaxFile()
+	    void writeTaxFile()
+	    Tax getTax();
+	    List<Tax> getAllTaxes()
+					
+	Product:
+	    Hashmap<Product> products
+
+	    void loadProductFile()
+	    void writeProductFile()
+	    List<Product> getAllProducts()
+
+
+Service:
+    File:
+        void loadOrderTaxProductFiles()
+        void loadOrderFile()
+	    void writeOrderFile()
+        void writeBackupFile()
+
+
+
+    Memory:
+        Order addOrder(Order orderToAdd) - calculate extra order fields
+        Order getOrder(int orderNo, LocalDate orderDate)
+        List<Order> getAllOrders(LocalDate orderDate)
+        Order removeOrder(int orderNo, LocalDate orderDate)
+        boolean validateStateInput(String stateInput)
+        Tax getTax();
+        List<Tax> getAllTaxes()
+        Product getProduct();
+        List<Product> getAllProducts()
+
+View:
+
+    int displayMenuAndGetUserChoice()
+    void displaySingleOrder(order order)
+    void displayListOrders(List<Order> listOrders)
+    int getOrderNo()
+    LocalDate getOrderDate()
+    String getNewOrderCustomerName()
+    String getNewOrderState()
+    Product displayProductSelectionAndGetSelection(List<Product> productList)
+    String getEditOrderCustomerName()
+    String getEditOrderState()
+    Product displayProductSelectionAndGetEditSelection(List<Product> productList)
+    BigDecimal getNewOrderArea()
+    int getYesOrNoSelection()
+
+
+
+Controller:
+    Load in products, taxes and orderDates - throws persistance exception
+    Displays menu to user and obtains choice
+
+    displayOrder:
+            Get order date from view
+            Attempt to read file from that date
+                If error - file not found exception
+            Read orders from that date to memory
+            Display to user
+
+    addOrder:
+            Make new order
+            Get date, name from view - verify in view - add to order
+            do (String stateInput = view.getNewOrderState()) while (!service.validateStateInput(stateInput))
+            Add state to order
+            Get ProductList from service, give to view, returns product selection - add to order
+            Get area from view - verify in view - add to order
+            Calculate remaining fields;
+            view.displaySingleOrder(order)
+            view.getYesOrNoSelection - if yes then add to memory if no then return to main menu
+                yes: service.addOrder
+
+    editOrder:
+            Get order date and no from view
+            get old order from service and check if null
+            Make new order
+            Follow controller addOrder method but with edit view methods
+
+    removeOrder:
+            Get order date and name from view
+            get old order from service/dao
+            return to controller - check if null and unsuccessful
+            inform user of result
+
+    exportData:
+            Get list of all dates with orders on from orderDAO
+            Store each date in variable
+            Writer in append
+            Call loadOrder of each date
+
+
+
+Changes:
+    + productFileDao: get, add, removeProduct
+    + TaxDao: Get, add, remove Tax
+    ~ OrderDao: OrderDays = list
+    + MemoryService: getTax(), getProduct();
+    + orderFileDao: addOrder(+String orderDate)
+    -orderFileDao: LocalDate parameter changed to string
+    -memoryService: LocalDate parameter changed to string
+    +orderFileDao: checkOrderExistsOnDay(String orderDate)
+    +orderFileDao: calculateAdditionalOrderFields(Order orderToCalc, String orderDate)
+    +Controller: displayMenuAndGetUserSelection;
+
+
+
+
+
+
+
+
+	
